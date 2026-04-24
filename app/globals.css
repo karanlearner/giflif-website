@@ -2,28 +2,18 @@
 
 /* =======================================================================
    GIFLIF Fest — brand tokens
-   Palette confirmed in brand system: red + cream + ink + warm accent
+   Tailwind v4 @theme: defines both CSS variables AND utility classes
+   (bg-red, text-cream, bg-ink, text-accent, font-serif, etc.)
    ======================================================================= */
 
-:root {
+@theme {
   --color-red: #b3121a;
   --color-cream: #faf4ea;
   --color-ink: #1a1a1a;
   --color-accent: #e87722;
-  --color-grey-600: #6b6b6b;
-  --color-grey-200: #e8e6e1;
-}
 
-@theme inline {
-  --color-background: var(--color-ink);
-  --color-foreground: var(--color-cream);
-  --color-red: var(--color-red);
-  --color-cream: var(--color-cream);
-  --color-ink: var(--color-ink);
-  --color-accent: var(--color-accent);
   --font-sans: var(--font-geist-sans);
   --font-serif: var(--font-fraunces);
-  --font-mono: var(--font-geist-mono);
 }
 
 body {
@@ -32,7 +22,75 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* ========== Reduced motion fallback (accessibility) ================== */
+/* ========== Horizontal scroll-snap hero ================================
+   Desktop: user swipes / scrolls horizontally through 5 panels.
+   Mobile:  panels stack vertically via the flex-col / md:flex-row toggle
+            applied at component level (Hero.tsx).
+   ======================================================================= */
+
+.hero-strip {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide the scrollbar — keep snapping behaviour */
+.hero-strip::-webkit-scrollbar {
+  display: none;
+}
+.hero-strip {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* ========== Keyframes ================================================== */
+
+@keyframes pulse-bar {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scaleX(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes draw-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-pulse-bar {
+  animation: pulse-bar 2.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.animate-float-in {
+  animation: float-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-draw-line {
+  animation: draw-line 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: left;
+}
+
+/* ========== Reduced motion fallback (accessibility) ==================== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
