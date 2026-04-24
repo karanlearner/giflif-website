@@ -1,65 +1,81 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="flex flex-1 flex-col items-center justify-between min-h-screen w-full px-6 py-12 sm:px-12 sm:py-16">
+      {/* Top mark */}
+      <header className="w-full flex items-center justify-between text-xs tracking-[0.2em] uppercase text-cream/60">
+        <span>GIFLIF Fest</span>
+        <span className="hidden sm:inline">Est. 2011 · Gurugram · Bhopal</span>
+      </header>
+
+      {/* Centre — the pitch */}
+      <section className="flex flex-col items-center justify-center text-center max-w-4xl flex-1 gap-8 py-12">
+        <div
+          aria-hidden="true"
+          className="h-1 w-16 bg-red rounded-full animate-pulse"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        <h1
+          className="font-serif text-5xl sm:text-7xl md:text-8xl leading-[0.95] tracking-tight text-cream"
+          style={{ fontFeatureSettings: '"ss01", "ss02"' }}
+        >
+          We build cultural IPs.
+          <br />
+          <span className="italic text-cream/80">For brands.</span>{" "}
+          <span className="italic text-red">And our own.</span>
+        </h1>
+
+        <p className="max-w-xl text-base sm:text-lg text-cream/70 leading-relaxed">
+          A creative consultancy behind{" "}
+          <span className="text-cream">
+            The Great Indian Film &amp; Literature Festival
+          </span>{" "}
+          and <span className="text-cream">Indiestaan Music Festival</span>.
+          We bring curation, audience intelligence, and production to brands,
+          universities, and artists we believe in.
+        </p>
+
+        <div className="pt-4 text-xs tracking-[0.2em] uppercase text-cream/50">
+          A new home arrives soon.
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+      </section>
+
+      {/* Footer */}
+      <footer className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-xs tracking-[0.15em] uppercase text-cream/50">
+        <span>
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="mailto:karan@giflif.in"
+            className="hover:text-cream transition-colors"
+          >
+            karan@giflif.in
+          </a>
+        </span>
+        <span className="flex gap-4">
+          <a
+            href="https://www.instagram.com/giflif_fest/"
             target="_blank"
             rel="noopener noreferrer"
+            className="hover:text-cream transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
+            Instagram
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://in.linkedin.com/company/giflif"
             target="_blank"
             rel="noopener noreferrer"
+            className="hover:text-cream transition-colors"
           >
-            Documentation
+            LinkedIn
           </a>
-        </div>
-      </main>
-    </div>
+          <a
+            href="https://www.youtube.com/c/GIFLIFFest"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-cream transition-colors"
+          >
+            YouTube
+          </a>
+        </span>
+      </footer>
+    </main>
   );
 }
