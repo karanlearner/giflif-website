@@ -1,267 +1,432 @@
-/**
- * Homepage Hero — 5-panel horizontal showcase.
- *
- * Desktop: CSS scroll-snap horizontal strip. User swipes / Shift+scrolls
- *          / uses arrow keys to move between panels.
- * Mobile:  panels stack vertically (same content, same order).
- *
- * v1 — pure CSS. No JS libraries.
- * v2 (future) — will upgrade to scroll-jacked: vertical scroll drives
- *                horizontal pan, via framer-motion / GSAP ScrollTrigger.
- */
+"use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Reveal, RevealWords } from "@/components/hero/RevealText";
+import NumberCounter from "@/components/hero/NumberCounter";
+import AudienceChart from "@/components/hero/AudienceChart";
+import ProgressDots from "@/components/hero/ProgressDots";
 
-type Panel = {
-  index: string; // "01" .. "05"
+/* ========================================================================
+ * Homepage Hero — 5-panel showcase.
+ *
+ * v1 (shipped earlier): CSS scroll-snap, solid color panels, simple reveal.
+ * v2 (this): scroll-triggered reveals, word-by-word text wipes, animated
+ *            SVG chart for Audience Intelligence, number counters for
+ *            stats, progress indicator, drifting gradient backgrounds,
+ *            grain texture on ink panels.
+ *
+ * Future v3: scroll-jacked pan (vertical scroll drives horizontal motion)
+ *            — requires framer-motion/GSAP install.
+ * ====================================================================== */
+
+type PanelKind = "brand" | "curation" | "audience" | "production" | "cta";
+type PanelTheme = "ink" | "cream" | "red";
+
+type PanelConfig = {
+  kind: PanelKind;
+  theme: PanelTheme;
+  index: string;
   kicker: string;
-  headline: ReactNode;
-  body?: ReactNode;
-  proof?: ReactNode;
-  cta?: { label: string; href: string };
-  bg: string; // Tailwind background class
-  fg: string; // Tailwind foreground class
-  kickerColor: string; // Tailwind text class for the kicker (small label)
-  accentBar: string; // Tailwind class for the thin animated bar
+  kickerOpacity: string;
 };
 
-const panels: Panel[] = [
-  {
-    index: "01",
-    kicker: "GIFLIF Fest",
-    headline: (
-      <>
-        We build<br className="hidden sm:inline" /> cultural IPs.
-      </>
-    ),
-    body: (
-      <>
-        <span className="italic text-cream/80">For brands.</span>{" "}
-        <span className="italic text-red">And our own.</span>
-      </>
-    ),
-    proof: (
-      <>
-        Curation · Audience Intelligence · Production.
-        <br />
-        Under one roof since 2011.
-      </>
-    ),
-    bg: "bg-ink",
-    fg: "text-cream",
-    kickerColor: "text-cream/50",
-    accentBar: "bg-red",
-  },
-  {
-    index: "02",
-    kicker: "Curation",
-    headline: <>We curate it.</>,
-    body: (
-      <>
-        Artists, speakers, ideas, concepts.
-        <br className="hidden sm:inline" /> Eleven years of curatorial
-        judgement.
-      </>
-    ),
-    proof: (
-      <>
-        Ruskin Bond · Javed Akhtar · Lucky Ali · Piyush Mishra · Raghubir
-        Yadav · Rahat Indori · Saurabh Shukla
-      </>
-    ),
-    bg: "bg-cream",
-    fg: "text-ink",
-    kickerColor: "text-ink/50",
-    accentBar: "bg-red",
-  },
-  {
-    index: "03",
-    kicker: "Audience Intelligence",
-    headline: (
-      <>
-        We know who<br className="hidden sm:inline" /> buys tickets.
-      </>
-    ),
-    body: (
-      <>
-        Our proprietary audience intelligence layer helps ticketed shows price
-        smarter, target better, and attribute reach to actual tickets sold.
-      </>
-    ),
-    proof: (
-      <span>
-        Running on{" "}
-        <span className="text-accent">
-          Papon · Gurdas Maan · Raghubir Yadav · Manoj Joshi
-        </span>
-        .
-      </span>
-    ),
-    bg: "bg-ink",
-    fg: "text-cream",
-    kickerColor: "text-accent",
-    accentBar: "bg-accent",
-  },
-  {
-    index: "04",
-    kicker: "Production",
-    headline: <>We build it.</>,
-    body: (
-      <>
-        Venue, stage, sound, on-ground — at any scale.
-        <br className="hidden sm:inline" /> Meticulous. On time. On budget.
-      </>
-    ),
-    proof: (
-      <>
-        149 projects · 8 festival editions · 13.8M digital reach (Indiestaan
-        Bhopal 2025).
-      </>
-    ),
-    bg: "bg-red",
-    fg: "text-cream",
-    kickerColor: "text-cream/70",
-    accentBar: "bg-cream",
-  },
-  {
-    index: "05",
-    kicker: "Let's build",
-    headline: (
-      <>
-        Got a show?<br className="hidden sm:inline" /> A launch? A fest?
-      </>
-    ),
-    body: <>Let's build it — together.</>,
-    cta: { label: "Start a brief", href: "/contact" },
-    bg: "bg-cream",
-    fg: "text-ink",
-    kickerColor: "text-ink/50",
-    accentBar: "bg-red",
-  },
+const panels: PanelConfig[] = [
+  { kind: "brand", theme: "ink", index: "01", kicker: "GIFLIF Fest", kickerOpacity: "text-cream/50" },
+  { kind: "curation", theme: "cream", index: "02", kicker: "Curation", kickerOpacity: "text-ink/50" },
+  { kind: "audience", theme: "ink", index: "03", kicker: "Audience Intelligence", kickerOpacity: "text-accent" },
+  { kind: "production", theme: "red", index: "04", kicker: "Production", kickerOpacity: "text-cream/70" },
+  { kind: "cta", theme: "cream", index: "05", kicker: "Let's build", kickerOpacity: "text-ink/50" },
 ];
+
+const themeClasses: Record<PanelTheme, { bg: string; fg: string; bar: string }> = {
+  ink: { bg: "bg-ink panel-ink", fg: "text-cream", bar: "bg-red" },
+  cream: { bg: "bg-cream", fg: "text-ink", bar: "bg-red" },
+  red: { bg: "bg-red panel-red", fg: "text-cream", bar: "bg-cream" },
+};
 
 // ============================================================================
 
-function Panel({ panel, isFirst }: { panel: Panel; isFirst?: boolean }) {
+export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [activePanel, setActivePanel] = useState(0);
+
+  // Track which panel is most visible — powers the progress dots.
+  useEffect(() => {
+    const strip = sectionRef.current;
+    if (!strip) return;
+
+    const panelEls = Array.from(
+      strip.querySelectorAll<HTMLElement>("[data-panel-index]")
+    );
+    if (panelEls.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            const idx = Number(
+              (entry.target as HTMLElement).dataset.panelIndex
+            );
+            setActivePanel(idx);
+          }
+        });
+      },
+      { threshold: [0.5, 0.6, 0.7] }
+    );
+
+    panelEls.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <>
+      <section
+        ref={sectionRef}
+        aria-label="GIFLIF Fest — positioning"
+        className="
+          hero-strip
+          flex flex-col md:flex-row
+          md:h-screen md:overflow-x-auto md:overflow-y-hidden
+          md:snap-x md:snap-mandatory
+        "
+      >
+        {panels.map((p, i) => (
+          <PanelFrame key={p.index} config={p} isFirst={i === 0} dataIndex={i}>
+            <PanelContent kind={p.kind} />
+          </PanelFrame>
+        ))}
+      </section>
+
+      <ProgressDots total={panels.length} active={activePanel} />
+    </>
+  );
+}
+
+// ============================================================================
+
+function PanelFrame({
+  config,
+  isFirst,
+  dataIndex,
+  children,
+}: {
+  config: PanelConfig;
+  isFirst?: boolean;
+  dataIndex: number;
+  children: ReactNode;
+}) {
+  const t = themeClasses[config.theme];
   return (
     <article
+      data-panel-index={dataIndex}
       className={`
         relative flex-shrink-0
         w-full md:w-screen
         h-screen
         md:snap-start
-        flex items-center justify-center
+        flex items-center
         px-6 sm:px-12 md:px-20 lg:px-28
-        ${panel.bg} ${panel.fg}
+        overflow-hidden
+        ${t.bg} ${t.fg}
       `}
     >
-      {/* Panel counter — top left */}
+      {/* Top-left: panel index */}
       <div
-        className={`absolute top-6 left-6 sm:top-10 sm:left-12 md:top-12 md:left-20 text-xs tracking-[0.25em] uppercase ${panel.kickerColor}`}
+        className={`absolute top-6 left-6 sm:top-10 sm:left-12 md:top-12 md:left-20
+                    text-xs tracking-[0.25em] uppercase ${config.kickerOpacity}
+                    font-mono`}
       >
-        {panel.index} / 05
+        {config.index} / 05
       </div>
 
-      {/* Kicker label — top right */}
+      {/* Top-right: kicker label */}
       <div
-        className={`absolute top-6 right-6 sm:top-10 sm:right-12 md:top-12 md:right-20 text-xs tracking-[0.25em] uppercase ${panel.kickerColor}`}
+        className={`absolute top-6 right-6 sm:top-10 sm:right-12 md:top-12 md:right-20
+                    text-xs tracking-[0.25em] uppercase ${config.kickerOpacity}`}
       >
-        {panel.kicker}
+        {config.kicker}
       </div>
 
-      {/* Center content */}
-      <div className="flex flex-col items-start max-w-3xl w-full gap-6 sm:gap-8">
-        <div
-          aria-hidden="true"
-          className={`h-[3px] w-16 ${panel.accentBar} rounded-full animate-pulse-bar`}
-        />
+      <div className="relative max-w-4xl w-full">{children}</div>
 
-        <h2
-          className="font-serif leading-[0.95] tracking-tight
-                     text-5xl sm:text-6xl md:text-7xl lg:text-8xl
-                     animate-float-in"
-          style={{ animationDelay: isFirst ? "0.1s" : "0s" }}
-        >
-          {panel.headline}
-        </h2>
-
-        {panel.body && (
-          <p
-            className="font-serif text-2xl sm:text-3xl md:text-4xl leading-snug max-w-2xl
-                       animate-float-in"
-            style={{ animationDelay: "0.25s" }}
+      {/* First panel scroll affordance */}
+      {isFirst && (
+        <>
+          <div
+            className="hidden md:flex absolute bottom-10 left-20
+                       items-center gap-3 text-xs tracking-[0.25em] uppercase text-cream/50"
           >
-            {panel.body}
-          </p>
-        )}
-
-        {panel.proof && (
-          <p
-            className="text-sm sm:text-base leading-relaxed max-w-xl opacity-70
-                       animate-float-in"
-            style={{ animationDelay: "0.4s" }}
+            <span className="inline-block h-[1px] w-10 bg-cream/30 animate-draw-line" />
+            <span>Swipe or scroll →</span>
+          </div>
+          <div
+            className="md:hidden absolute bottom-10 left-1/2 -translate-x-1/2
+                       flex flex-col items-center gap-2 text-xs tracking-[0.25em] uppercase text-cream/50"
           >
-            {panel.proof}
-          </p>
-        )}
-
-        {panel.cta && (
-          <a
-            href={panel.cta.href}
-            className="group mt-2 inline-flex items-center gap-3
-                       px-8 py-4 rounded-full
-                       bg-red text-cream
-                       text-sm sm:text-base tracking-wide uppercase
-                       transition-transform hover:scale-[1.02]
-                       animate-float-in"
-            style={{ animationDelay: "0.4s" }}
-          >
-            <span>{panel.cta.label}</span>
-            <span
-              aria-hidden="true"
-              className="transition-transform group-hover:translate-x-1"
-            >
-              →
+            <span>Scroll</span>
+            <span aria-hidden="true" className="animate-bounce">
+              ↓
             </span>
-          </a>
-        )}
-      </div>
-
-      {/* Bottom affordance — only on first panel on desktop */}
-      {isFirst && (
-        <div className="hidden md:flex absolute bottom-10 left-20 items-center gap-3 text-xs tracking-[0.25em] uppercase text-cream/50">
-          <span className="inline-block h-[1px] w-10 bg-cream/30 animate-draw-line" />
-          <span>Swipe or scroll →</span>
-        </div>
-      )}
-
-      {/* Mobile affordance — arrow down on first panel */}
-      {isFirst && (
-        <div className="md:hidden absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-xs tracking-[0.25em] uppercase text-cream/50">
-          <span>Scroll</span>
-          <span aria-hidden="true">↓</span>
-        </div>
+          </div>
+        </>
       )}
     </article>
   );
 }
 
 // ============================================================================
+// Per-panel content — each gets its own treatment
+// ============================================================================
 
-export default function Hero() {
+function PanelContent({ kind }: { kind: PanelKind }) {
+  switch (kind) {
+    case "brand":
+      return <BrandPanel />;
+    case "curation":
+      return <CurationPanel />;
+    case "audience":
+      return <AudiencePanel />;
+    case "production":
+      return <ProductionPanel />;
+    case "cta":
+      return <CtaPanel />;
+  }
+}
+
+// ---- Panel 01 — BRAND ----
+function BrandPanel() {
   return (
-    <section
-      aria-label="GIFLIF Fest — positioning"
-      className="
-        hero-strip
-        flex flex-col md:flex-row
-        md:h-screen md:overflow-x-auto md:overflow-y-hidden
-        md:snap-x md:snap-mandatory
-      "
-    >
-      {panels.map((p, i) => (
-        <Panel key={p.index} panel={p} isFirst={i === 0} />
-      ))}
-    </section>
+    <div className="flex flex-col items-start gap-6 sm:gap-8">
+      <Reveal>
+        <div
+          aria-hidden="true"
+          className="h-[3px] w-16 bg-red rounded-full animate-pulse-bar"
+        />
+      </Reveal>
+
+      <h1 className="font-serif leading-[0.95] tracking-tight text-cream
+                     text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+        <RevealWords text="We build" stagger={80} startDelay={100} />
+        <br className="hidden sm:inline" />
+        <RevealWords text="cultural IPs." stagger={80} startDelay={280} />
+      </h1>
+
+      <p className="font-serif text-2xl sm:text-3xl md:text-4xl leading-snug">
+        <span className="italic text-cream/80">
+          <RevealWords text="For brands." stagger={80} startDelay={900} />
+        </span>{" "}
+        <span className="italic text-red">
+          <RevealWords text="And our own." stagger={80} startDelay={1150} />
+        </span>
+      </p>
+
+      <Reveal as="p" delay={1600} className="text-sm sm:text-base text-cream/60 max-w-xl leading-relaxed">
+        Curation · Audience Intelligence · Production.
+        <br />
+        Under one roof since 2011.
+      </Reveal>
+    </div>
+  );
+}
+
+// ---- Panel 02 — CURATION ----
+function CurationPanel() {
+  return (
+    <div className="flex flex-col items-start gap-6 sm:gap-8">
+      <Reveal>
+        <div
+          aria-hidden="true"
+          className="h-[3px] w-16 bg-red rounded-full animate-pulse-bar"
+        />
+      </Reveal>
+
+      <h2 className="font-serif leading-[0.95] tracking-tight text-ink
+                     text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+        <RevealWords text="We curate it." stagger={90} startDelay={100} />
+      </h2>
+
+      <Reveal as="p" delay={400} className="font-serif text-2xl sm:text-3xl md:text-4xl leading-snug text-ink max-w-2xl">
+        Artists, speakers, ideas, concepts.
+      </Reveal>
+
+      <Reveal as="p" delay={550} className="text-sm sm:text-base text-ink/60 max-w-xl leading-relaxed">
+        Eleven years of curatorial judgement — from poetry to punk to
+        political non-fiction.
+      </Reveal>
+
+      {/* Name-drop strip — reveal one at a time */}
+      <Reveal as="div" delay={800} className="flex flex-wrap gap-x-4 gap-y-2 pt-4 text-xs sm:text-sm tracking-[0.15em] uppercase text-ink/50 max-w-2xl">
+        {[
+          "Ruskin Bond",
+          "Javed Akhtar",
+          "Lucky Ali",
+          "Piyush Mishra",
+          "Raghubir Yadav",
+          "Rahat Indori",
+          "Saurabh Shukla",
+          "Indian Ocean",
+          "Kabir Cafe",
+        ].map((name, i) => (
+          <span key={name} className="flex items-center gap-4">
+            {name}
+            {i < 8 && <span className="text-ink/20">·</span>}
+          </span>
+        ))}
+      </Reveal>
+    </div>
+  );
+}
+
+// ---- Panel 03 — AUDIENCE INTELLIGENCE (the moat) ----
+function AudiencePanel() {
+  return (
+    <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-16 w-full">
+      <div className="flex flex-col items-start gap-6 sm:gap-8 flex-1 min-w-0">
+        <Reveal>
+          <div
+            aria-hidden="true"
+            className="h-[3px] w-16 bg-accent rounded-full animate-pulse-bar"
+          />
+        </Reveal>
+
+        <h2 className="font-serif leading-[0.95] tracking-tight text-cream
+                       text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+          <RevealWords text="We know who" stagger={90} startDelay={100} />
+          <br className="hidden sm:inline" />
+          <RevealWords text="buys tickets." stagger={90} startDelay={400} />
+        </h2>
+
+        <Reveal as="p" delay={1100} className="text-base sm:text-lg text-cream/80 max-w-xl leading-relaxed">
+          A proprietary audience intelligence layer — built over a decade of
+          running ticketed shows. Helps you price smarter, target better, and
+          attribute reach to actual tickets sold.
+        </Reveal>
+
+        <Reveal as="p" delay={1350} className="text-xs sm:text-sm tracking-[0.15em] uppercase text-cream/50">
+          Running on{" "}
+          <span className="text-accent">
+            Papon · Gurdas Maan · Raghubir Yadav · Manoj Joshi
+          </span>
+        </Reveal>
+      </div>
+
+      {/* Chart on right side (desktop) / below (mobile) */}
+      <div className="w-full lg:max-w-md lg:pt-6">
+        <AudienceChart />
+      </div>
+    </div>
+  );
+}
+
+// ---- Panel 04 — PRODUCTION ----
+function ProductionPanel() {
+  return (
+    <div className="flex flex-col items-start gap-6 sm:gap-8">
+      <Reveal>
+        <div
+          aria-hidden="true"
+          className="h-[3px] w-16 bg-cream rounded-full animate-pulse-bar"
+        />
+      </Reveal>
+
+      <h2 className="font-serif leading-[0.95] tracking-tight text-cream
+                     text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+        <RevealWords text="We build it." stagger={90} startDelay={100} />
+      </h2>
+
+      <Reveal as="p" delay={500} className="font-serif text-2xl sm:text-3xl md:text-4xl leading-snug text-cream/90 max-w-2xl">
+        Venue. Stage. Sound. On-ground — at any scale.
+      </Reveal>
+
+      {/* Big number grid */}
+      <Reveal as="div" delay={900} className="grid grid-cols-3 gap-6 sm:gap-12 pt-6 sm:pt-10 w-full max-w-2xl">
+        <Stat number={149} suffix="+" label="Projects since 2011" />
+        <Stat number={8} label="Festival editions" />
+        <Stat number={13.8} decimals={1} suffix="M" label="Digital reach (2025)" />
+      </Reveal>
+    </div>
+  );
+}
+
+function Stat({
+  number,
+  decimals = 0,
+  suffix = "",
+  label,
+}: {
+  number: number;
+  decimals?: number;
+  suffix?: string;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col gap-2 border-l-2 border-cream/30 pl-4 sm:pl-6">
+      <span className="font-serif text-4xl sm:text-5xl md:text-6xl text-cream leading-none">
+        <NumberCounter target={number} decimals={decimals} suffix={suffix} />
+      </span>
+      <span className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-cream/70 leading-snug">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// ---- Panel 05 — CTA ----
+function CtaPanel() {
+  return (
+    <div className="flex flex-col items-start gap-6 sm:gap-8 max-w-3xl">
+      <Reveal>
+        <div
+          aria-hidden="true"
+          className="h-[3px] w-16 bg-red rounded-full animate-pulse-bar"
+        />
+      </Reveal>
+
+      <h2 className="font-serif leading-[0.95] tracking-tight text-ink
+                     text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+        <RevealWords text="Got a show?" stagger={90} startDelay={100} />
+        <br className="hidden sm:inline" />
+        <RevealWords text="A launch?" stagger={90} startDelay={380} />{" "}
+        <span className="italic text-red">
+          <RevealWords text="A fest?" stagger={90} startDelay={620} />
+        </span>
+      </h2>
+
+      <Reveal as="p" delay={1100} className="font-serif text-2xl sm:text-3xl md:text-4xl leading-snug text-ink">
+        Let's build it — together.
+      </Reveal>
+
+      <Reveal as="div" delay={1400}>
+        <a
+          href="/contact"
+          className="group inline-flex items-center gap-3
+                     px-8 py-4 rounded-full
+                     bg-red text-cream
+                     text-sm sm:text-base tracking-wide uppercase
+                     transition-all duration-300
+                     hover:shadow-[0_12px_40px_-8px_rgba(179,18,26,0.5)]
+                     hover:scale-[1.02]"
+        >
+          <span>Start a brief</span>
+          <span
+            aria-hidden="true"
+            className="transition-transform group-hover:translate-x-1"
+          >
+            →
+          </span>
+        </a>
+      </Reveal>
+
+      <Reveal as="p" delay={1600} className="text-xs sm:text-sm tracking-[0.15em] uppercase text-ink/50 pt-4">
+        or write to{" "}
+        <a
+          href="mailto:karan@giflif.in"
+          className="text-ink hover:text-red transition-colors"
+        >
+          karan@giflif.in
+        </a>
+      </Reveal>
+    </div>
   );
 }
