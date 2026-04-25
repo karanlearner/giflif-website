@@ -126,16 +126,40 @@ body {
 }
 
 /* =======================================================================
-   Portrait cards (Curation panel)
-   Black-and-white default; restore colour on hover. Subtle scale on hover.
+   Curation cinematic carousel — single-portrait crossfade gallery
+   (replaces old portrait-grid that read too generic.)
    ======================================================================= */
 
-.portrait-card {
-  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.15);
+@keyframes carousel-progress-fill {
+  from { width: 0%; }
+  to { width: 100%; }
 }
 
-.portrait-card:hover {
-  box-shadow: 0 12px 40px -10px rgba(179, 18, 26, 0.35);
+.carousel-progress-active {
+  width: 0%;
+  animation-name: carousel-progress-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes nameplate-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.carousel-nameplate {
+  animation: nameplate-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* When paused (cursor over carousel), freeze the progress bar where it is */
+.curated-carousel:hover .carousel-progress-active {
+  animation-play-state: paused;
 }
 
 /* =======================================================================

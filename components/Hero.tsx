@@ -268,21 +268,34 @@ function BrandPanel() {
 
 // ---- Panel 02 — CURATION ----
 const CURATED_PORTRAITS = [
-  { slug: "ruskin-bond", name: "Ruskin Bond", role: "Author" },
-  { slug: "javed-akhtar", name: "Javed Akhtar", role: "Poet · Lyricist" },
-  { slug: "gulzar", name: "Gulzar", role: "Poet · Filmmaker" },
-  { slug: "lucky-ali", name: "Lucky Ali", role: "Musician" },
-  { slug: "piyush-mishra", name: "Piyush Mishra", role: "Actor · Lyricist" },
-  { slug: "rahat-indori", name: "Rahat Indori", role: "Poet" },
-  { slug: "saurabh-shukla", name: "Saurabh Shukla", role: "Actor · Director" },
-  { slug: "taapsee-pannu", name: "Taapsee Pannu", role: "Actor" },
+  { slug: "ruskin-bond", name: "Ruskin Bond", role: "Author", year: "Bhopal · 2018" },
+  { slug: "javed-akhtar", name: "Javed Akhtar", role: "Poet · Lyricist", year: "Gurugram · 2016" },
+  { slug: "gulzar", name: "Gulzar", role: "Poet · Filmmaker", year: "Gurugram · 2016" },
+  { slug: "lucky-ali", name: "Lucky Ali", role: "Musician", year: "Indiestaan · Bhopal · 2023" },
+  { slug: "piyush-mishra", name: "Piyush Mishra", role: "Actor · Lyricist", year: "Bhopal · 2019" },
+  { slug: "rahat-indori", name: "Rahat Indori", role: "Poet", year: "Bhopal · 2017" },
+  { slug: "saurabh-shukla", name: "Saurabh Shukla", role: "Actor · Director", year: "Bhopal · 2018" },
+  { slug: "taapsee-pannu", name: "Taapsee Pannu", role: "Actor", year: "Bhopal · 2018" },
 ];
 
 function CurationPanel() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const ROTATION_MS = 3800;
+
+  // Auto-rotate through portraits
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % CURATED_PORTRAITS.length);
+    }, ROTATION_MS);
+    return () => clearInterval(id);
+  }, [paused]);
+
   return (
-    <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-16 w-full">
-      {/* Left side: copy */}
-      <div className="flex flex-col items-start gap-6 sm:gap-8 lg:max-w-md flex-1 min-w-0">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 w-full items-stretch">
+      {/* LEFT — quiet copy block */}
+      <div className="lg:col-span-5 flex flex-col items-start gap-6 sm:gap-8 lg:justify-center">
         <Reveal>
           <div
             aria-hidden="true"
@@ -291,57 +304,97 @@ function CurationPanel() {
         </Reveal>
 
         <h2 className="font-serif leading-[0.95] tracking-tight text-ink
-                       text-5xl sm:text-6xl md:text-7xl">
-          <RevealWords text="We curate it." stagger={90} startDelay={100} />
+                       text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+          <RevealWords text="We curate" stagger={90} startDelay={100} />
+          <br />
+          <span className="italic text-red">
+            <RevealWords text="it." stagger={90} startDelay={300} />
+          </span>
         </h2>
 
-        <Reveal as="p" delay={400} className="font-serif text-2xl sm:text-3xl leading-snug text-ink max-w-md">
-          Artists, speakers, ideas, concepts.
-        </Reveal>
-
-        <Reveal as="p" delay={550} className="text-sm sm:text-base text-ink/60 leading-relaxed max-w-md">
-          Eleven years of curatorial judgement — from poetry to punk to
-          political non-fiction. A few of the people who've trusted us with
-          their stage:
+        <Reveal as="p" delay={500} className="font-serif text-xl sm:text-2xl leading-snug text-ink max-w-md">
+          Eleven years. The most distinguished voices in Indian culture — on
+          our stages.
         </Reveal>
       </div>
 
-      {/* Right side: portrait grid */}
+      {/* RIGHT — single cinematic carousel */}
       <Reveal
         as="div"
         delay={700}
-        className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full lg:flex-1 lg:max-w-2xl"
+        className="lg:col-span-7 relative w-full aspect-[4/5] lg:aspect-auto lg:h-[78vh] overflow-hidden rounded-sm bg-ink"
       >
-        {CURATED_PORTRAITS.map((p, i) => (
-          <figure
-            key={p.slug}
-            className="portrait-card group relative overflow-hidden rounded-md aspect-[3/4] bg-ink/5"
-            style={{
-              animationDelay: `${800 + i * 60}ms`,
-            }}
-          >
+        <div
+          className="curated-carousel absolute inset-0"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          {CURATED_PORTRAITS.map((p, i) => (
             <img
+              key={p.slug}
               src={`/images/curation/${p.slug}.webp`}
               alt={`${p.name} — ${p.role}`}
-              loading={i < 4 ? "eager" : "lazy"}
-              className="absolute inset-0 w-full h-full object-cover
-                         transition-all duration-700 ease-out
-                         grayscale group-hover:grayscale-0
-                         scale-100 group-hover:scale-[1.04]"
+              loading={i === 0 ? "eager" : "lazy"}
+              className={`absolute inset-0 w-full h-full object-cover grayscale
+                          ${i === index ? "opacity-100" : "opacity-0"}`}
+              style={{
+                transform: i === index ? "scale(1)" : "scale(1.04)",
+                transition:
+                  "opacity 1200ms ease-in-out, transform 5000ms ease-out",
+              }}
             />
-            {/* Bottom gradient + caption */}
-            <figcaption className="absolute inset-x-0 bottom-0 p-2 sm:p-3
-                                   bg-gradient-to-t from-ink/90 via-ink/40 to-transparent
-                                   text-cream">
-              <div className="text-[10px] sm:text-xs tracking-[0.15em] uppercase font-medium leading-tight">
-                {p.name}
+          ))}
+
+          {/* Top progress strip — 8 thin bars, the active one fills */}
+          <div className="absolute top-5 left-5 right-5 flex gap-1.5 z-10">
+            {CURATED_PORTRAITS.map((_, i) => (
+              <div
+                key={i}
+                className="h-[2px] flex-1 bg-cream/20 overflow-hidden"
+              >
+                <div
+                  className={`h-full bg-cream ${
+                    i === index
+                      ? "carousel-progress-active"
+                      : i < index
+                      ? "w-full"
+                      : "w-0"
+                  }`}
+                  style={
+                    i === index && !paused
+                      ? { animationDuration: `${ROTATION_MS}ms` }
+                      : undefined
+                  }
+                />
               </div>
-              <div className="text-[9px] sm:text-[10px] tracking-[0.1em] uppercase text-cream/70 mt-0.5">
-                {p.role}
+            ))}
+          </div>
+
+          {/* Bottom name plate */}
+          <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 md:p-12
+                          bg-gradient-to-t from-ink via-ink/80 to-transparent
+                          text-cream z-10">
+            <div
+              key={CURATED_PORTRAITS[index].slug}
+              className="carousel-nameplate"
+            >
+              <div className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-cream/60 mb-2 sm:mb-3">
+                {CURATED_PORTRAITS[index].role}
               </div>
-            </figcaption>
-          </figure>
-        ))}
+              <div className="font-serif text-3xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tight">
+                {CURATED_PORTRAITS[index].name}
+              </div>
+              <div className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-cream/50 mt-3 sm:mt-4">
+                {CURATED_PORTRAITS[index].year}
+              </div>
+            </div>
+          </div>
+
+          {/* Subtle counter — top right */}
+          <div className="absolute top-5 right-5 text-[10px] tracking-[0.25em] uppercase text-cream/60 font-mono z-10">
+            {String(index + 1).padStart(2, "0")} / {String(CURATED_PORTRAITS.length).padStart(2, "0")}
+          </div>
+        </div>
       </Reveal>
     </div>
   );
