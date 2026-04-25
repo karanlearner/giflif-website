@@ -1,16 +1,22 @@
 @import "tailwindcss";
 
 /* =======================================================================
-   GIFLIF Fest — brand tokens
-   Tailwind v4 @theme: defines both CSS variables AND utility classes
-   (bg-red, text-cream, bg-ink, text-accent, font-serif, etc.)
+   GIFLIF Fest — brand tokens v2 (vibrant rebuild, 2026-04-25)
+   Foundation: red + cream + ink (kept). Vibrant accents added for the
+   GenZ-coded aesthetic Karan asked for. Motion graphics everywhere.
    ======================================================================= */
 
 @theme {
+  /* Foundations */
   --color-red: #b3121a;
   --color-cream: #faf4ea;
   --color-ink: #1a1a1a;
-  --color-accent: #e87722;
+
+  /* Vibrant accent palette */
+  --color-electric: #2d4fff;   /* Electric blue */
+  --color-magenta: #ff3d8a;    /* Hot pink / magenta */
+  --color-lime: #deff3d;       /* Vibrant lime / sunshine */
+  --color-accent: #e87722;     /* Warm orange (kept for Audience Intelligence) */
 
   --font-sans: var(--font-geist-sans);
   --font-serif: var(--font-fraunces);
@@ -20,309 +26,259 @@ body {
   background: var(--color-ink);
   color: var(--color-cream);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 /* =======================================================================
-   Horizontal scroll-snap hero
+   Animated gradient mesh background
+   Used behind the Umbrella hero — slow drift between vibrant blobs.
    ======================================================================= */
 
-.hero-strip {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-}
-.hero-strip::-webkit-scrollbar {
-  display: none;
-}
-.hero-strip {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-/* =======================================================================
-   Ink panel — animated gradient ambience + grain texture
-   Subtle red + accent glows drifting slowly. Makes "solid black" feel alive.
-   ======================================================================= */
-
-.panel-ink::before {
-  content: "";
+.gradient-mesh {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(
-      ellipse 60% 40% at 20% 30%,
-      rgba(179, 18, 26, 0.12) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 50% 50% at 80% 70%,
-      rgba(232, 119, 34, 0.08) 0%,
-      transparent 60%
-    );
-  animation: ambient-drift 22s ease-in-out infinite;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-.panel-ink > * {
-  position: relative;
-  z-index: 1;
-}
-
-.panel-red::before {
+.gradient-mesh::before,
+.gradient-mesh::after {
   content: "";
   position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(
-      ellipse 70% 50% at 70% 20%,
-      rgba(250, 244, 234, 0.12) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 60% at 10% 80%,
-      rgba(26, 26, 26, 0.18) 0%,
-      transparent 60%
-    );
-  animation: ambient-drift 28s ease-in-out infinite reverse;
-  z-index: 0;
-}
-
-.panel-red > * {
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes ambient-drift {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  33% {
-    transform: translate3d(2%, -3%, 0) scale(1.05);
-  }
-  66% {
-    transform: translate3d(-2%, 2%, 0) scale(0.98);
-  }
-}
-
-/* =======================================================================
-   Full-bleed background photographs — slow Ken Burns drift
-   Used on panels with bgImage (currently the Production panel).
-   Subtle pan + zoom keeps a still photo feeling alive.
-   ======================================================================= */
-
-.panel-bg-photo {
-  animation: kenburns 30s ease-in-out infinite alternate;
+  width: 70vmax;
+  height: 70vmax;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.7;
   will-change: transform;
 }
 
-@keyframes kenburns {
-  0% {
-    transform: scale(1.05) translate(0, 0);
-  }
-  100% {
-    transform: scale(1.12) translate(-1.5%, 1%);
-  }
+.gradient-mesh::before {
+  background: radial-gradient(circle at center, var(--color-red) 0%, transparent 60%);
+  top: -20%;
+  left: -10%;
+  animation: blob-drift-1 22s ease-in-out infinite alternate;
 }
 
-/* =======================================================================
-   Curation TEXT-MASK — portraits live INSIDE the letterforms.
-   The headline "We curate it." is the viewport. The cream background fills
-   everything outside the letters. Inside the letters: a black-and-white
-   photograph that cycles every few seconds. Editorial, distinctive,
-   on-brand for a literary festival.
-   ======================================================================= */
-
-.text-portrait-mask {
-  /* The portrait image is set via the inline `--portrait-image` CSS variable */
-  background-image: var(--portrait-image);
-  background-size: cover;
-  background-position: 50% 30%; /* favour the eyes/face area */
-  background-repeat: no-repeat;
-  /* Clip the background to the letterforms */
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  /* Slight desaturation + contrast lift for editorial feel */
-  filter: grayscale(0.15) contrast(1.05);
-  /* Slow Ken Burns drift INSIDE the letters keeps the mask alive */
-  animation: text-mask-drift 14s ease-in-out infinite alternate;
-  will-change: background-position, transform;
+.gradient-mesh::after {
+  background: radial-gradient(circle at center, var(--color-electric) 0%, transparent 60%);
+  bottom: -25%;
+  right: -10%;
+  animation: blob-drift-2 28s ease-in-out infinite alternate;
 }
 
-@keyframes text-mask-drift {
-  0% {
-    background-position: 50% 28%;
-    background-size: 100% auto;
-  }
-  100% {
-    background-position: 52% 36%;
-    background-size: 108% auto;
-  }
+.gradient-mesh > .blob-magenta {
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, var(--color-magenta) 0%, transparent 60%);
+  filter: blur(80px);
+  opacity: 0.5;
+  top: 30%;
+  right: -20%;
+  animation: blob-drift-3 26s ease-in-out infinite alternate;
 }
 
-/* When the React `key` updates (new portrait), the element remounts and
-   plays this entrance — softly blurred + scaled, snapping into focus. */
-.text-portrait-mask {
-  animation:
-    text-mask-drift 14s ease-in-out infinite alternate,
-    text-mask-enter 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+@keyframes blob-drift-1 {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(8%, 12%) scale(1.15); }
+}
+@keyframes blob-drift-2 {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(-10%, -8%) scale(1.2); }
+}
+@keyframes blob-drift-3 {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(-15%, 10%) scale(0.9); }
 }
 
-@keyframes text-mask-enter {
-  from {
-    opacity: 0;
-    filter: grayscale(0.6) contrast(1) blur(10px);
-    transform: translateY(8px) scale(1.01);
-  }
-  to {
-    opacity: 1;
-    filter: grayscale(0.15) contrast(1.05) blur(0);
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Curation panel hover — reveal a subtle red glow under the type */
-.curation-stage:hover .text-portrait-mask {
-  filter: grayscale(0) contrast(1.1);
-  transition: filter 600ms ease-out;
-}
-
-/* =======================================================================
-   IP showcase — split-screen reveal with logos
-   ======================================================================= */
-
-.ip-card {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.ip-card-bg {
+/* Grain overlay — adds film-like texture across vibrant gradients */
+.grain {
   position: absolute;
   inset: 0;
-  z-index: 0;
-  background-size: cover;
-  background-position: center;
-  filter: grayscale(0.35) brightness(0.45);
-  transform: scale(1.08);
-  transition:
-    filter 900ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 8s ease-out;
-}
-
-.ip-card:hover .ip-card-bg {
-  filter: grayscale(0) brightness(0.55);
-  transform: scale(1.12);
-}
-
-/* Curtain mask reveal — clip-path opens from center outward */
-.ip-card-curtain {
-  position: relative;
-  z-index: 1;
-  clip-path: inset(50% 0 50% 0);
-  transition: clip-path 1.4s cubic-bezier(0.7, 0, 0.3, 1);
-}
-
-.ip-card[data-seen="true"] .ip-card-curtain {
-  clip-path: inset(0 0 0 0);
-}
-
-.ip-card-logo {
-  opacity: 0;
-  transform: translateY(16px) scale(0.96);
-  transition:
-    opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s,
-    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s,
-    filter 0.6s ease-out;
-}
-
-.ip-card[data-seen="true"] .ip-card-logo {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.ip-card:hover .ip-card-logo {
-  filter: drop-shadow(0 12px 30px rgba(255, 255, 255, 0.18));
-  transform: translateY(-4px) scale(1.02);
-}
-
-.ip-card-meta {
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s,
-    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s;
-}
-
-.ip-card[data-seen="true"] .ip-card-meta {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Animated edge accent — thin coloured line draws across when in view */
-.ip-card-edge {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 100%;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) 1.2s;
-  z-index: 2;
-}
-
-.ip-card[data-seen="true"] .ip-card-edge {
-  transform: scaleX(1);
+  pointer-events: none;
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px;
 }
 
 /* =======================================================================
-   Curation cinematic carousel — single-portrait crossfade gallery
-   (replaces old portrait-grid that read too generic.)
+   Marquee — infinite-scroll horizontal text strip
+   Used everywhere: name drops, client logos, kinetic accents.
    ======================================================================= */
 
-@keyframes carousel-progress-fill {
-  from { width: 0%; }
-  to { width: 100%; }
+.marquee {
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
 }
 
-.carousel-progress-active {
-  width: 0%;
-  animation-name: carousel-progress-fill;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
+.marquee__track {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  animation: marquee-scroll var(--marquee-duration, 38s) linear infinite;
+  gap: var(--marquee-gap, 4rem);
 }
 
-@keyframes nameplate-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.marquee[data-direction="reverse"] .marquee__track {
+  animation-direction: reverse;
 }
 
-.carousel-nameplate {
-  animation: nameplate-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-/* When paused (cursor over carousel), freeze the progress bar where it is */
-.curated-carousel:hover .carousel-progress-active {
+.marquee:hover .marquee__track {
   animation-play-state: paused;
 }
 
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-100% - var(--marquee-gap, 4rem))); }
+}
+
 /* =======================================================================
-   Reveal animations — triggered by [data-seen="true"] attribute
+   Kinetic headline — word-by-word scale + rotate reveal
+   Each word starts shrunk and slightly rotated, snaps into place with
+   a stagger. Used on big section headlines.
    ======================================================================= */
 
-/* Simple block reveal — fade + float up */
+.kinetic-line { display: block; overflow: hidden; line-height: 1; }
+.kinetic-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(60%) scale(0.9) rotate(-3deg);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 0.9s cubic-bezier(0.16, 1.2, 0.4, 1);
+}
+.kinetic-line[data-seen="true"] .kinetic-word {
+  opacity: 1;
+  transform: translateY(0) scale(1) rotate(0);
+}
+
+/* =======================================================================
+   Sticker badges — rotated, vibrant little tags floating around content
+   ======================================================================= */
+
+.sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  box-shadow: 0 6px 20px -6px rgba(0,0,0,0.3);
+  white-space: nowrap;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sticker:hover { transform: rotate(0deg) scale(1.06) !important; }
+
+.sticker-pulse::before {
+  content: "";
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 0.4rem;
+  box-shadow: 0 0 0 0 currentColor;
+  animation: sticker-pulse 1.6s ease-in-out infinite;
+}
+@keyframes sticker-pulse {
+  0%   { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+  70%  { box-shadow: 0 0 0 12px transparent; opacity: 0.9; }
+  100% { box-shadow: 0 0 0 0 transparent; opacity: 1; }
+}
+
+/* Floating sticker — slow continuous wobble */
+.sticker-float {
+  animation: sticker-wobble var(--wobble-duration, 6s) ease-in-out infinite;
+}
+@keyframes sticker-wobble {
+  0%, 100% { transform: rotate(var(--rot, -4deg)) translateY(0); }
+  50%      { transform: rotate(calc(var(--rot, -4deg) + 2deg)) translateY(-6px); }
+}
+
+/* =======================================================================
+   Lite YouTube — facade card before the iframe loads
+   ======================================================================= */
+
+.lite-yt {
+  position: relative;
+  display: block;
+  background: #000;
+  cursor: pointer;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+.lite-yt__thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+              filter 0.6s ease-out;
+}
+.lite-yt:hover .lite-yt__thumb {
+  transform: scale(1.04);
+  filter: brightness(0.9) saturate(1.1);
+}
+.lite-yt__btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-red);
+  color: var(--color-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  border: 3px solid rgba(255,255,255,0.9);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.3s ease;
+  box-shadow: 0 12px 40px -8px rgba(0,0,0,0.5);
+}
+.lite-yt:hover .lite-yt__btn {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: var(--color-magenta);
+}
+
+/* =======================================================================
+   IP card vibrant — replaces the older muted IP showcase
+   ======================================================================= */
+
+.ip-card-vibrant {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ip-card-vibrant:hover {
+  transform: translateY(-4px);
+}
+.ip-card-vibrant .ip-grad {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: opacity 0.6s ease-out;
+}
+.ip-card-vibrant:hover .ip-grad { opacity: 0.85; }
+
+/* =======================================================================
+   Reveal — generic IntersectionObserver-driven entrance for blocks
+   ======================================================================= */
+
 .reveal-block {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(28px);
   transition:
     opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
     transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -332,102 +288,26 @@ body {
   transform: translateY(0);
 }
 
-/* Word-by-word reveal — mask wipe from below */
-.reveal-words {
-  display: inline;
-}
-.word-mask {
-  display: inline-block;
-  overflow: hidden;
-  line-height: 1;
-  vertical-align: bottom;
-}
-.word-inner {
-  display: inline-block;
-  transform: translateY(110%);
-  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: transform;
-}
-.word-space {
-  display: inline-block;
-  width: 0.25em;
-}
-.reveal-words[data-seen="true"] .word-inner {
-  transform: translateY(0);
-}
-
 /* =======================================================================
-   Audience Intelligence SVG chart animations
+   Color sweep transition — full-width vibrant strip drawing across
+   between sections, used as a section divider that feels alive.
    ======================================================================= */
 
-.audience-chart .chart-line {
-  stroke-dasharray: 1200;
-  stroke-dashoffset: 1200;
-  transition: stroke-dashoffset 2.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+.color-sweep {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(90deg,
+    var(--color-red) 0%,
+    var(--color-magenta) 25%,
+    var(--color-electric) 50%,
+    var(--color-lime) 75%,
+    var(--color-red) 100%);
+  background-size: 200% 100%;
+  animation: color-sweep-pan 8s linear infinite;
 }
-.audience-chart[data-seen="true"] .chart-line {
-  stroke-dashoffset: 0;
-}
-
-.audience-chart .chart-area {
-  opacity: 0;
-  transform: scaleY(0.3);
-  transform-origin: bottom;
-  transition:
-    opacity 1.2s cubic-bezier(0.25, 0.8, 0.25, 1) 1s,
-    transform 1.2s cubic-bezier(0.25, 0.8, 0.25, 1) 1s;
-}
-.audience-chart[data-seen="true"] .chart-area {
-  opacity: 1;
-  transform: scaleY(1);
-}
-
-.audience-chart .chart-dots circle {
-  opacity: 0;
-  transform: scale(0);
-  transform-origin: center;
-  transform-box: fill-box;
-  transition:
-    opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
-    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.audience-chart[data-seen="true"] .chart-dots circle {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* =======================================================================
-   Utility keyframes
-   ======================================================================= */
-
-@keyframes pulse-bar {
-  0%, 100% {
-    opacity: 0.45;
-    transform: scaleX(0.85);
-  }
-  50% {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
-
-@keyframes draw-line {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-.animate-pulse-bar {
-  animation: pulse-bar 2.8s ease-in-out infinite;
-  transform-origin: center;
-}
-
-.animate-draw-line {
-  animation: draw-line 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  transform-origin: left;
+@keyframes color-sweep-pan {
+  from { background-position: 0% 50%; }
+  to   { background-position: 200% 50%; }
 }
 
 /* =======================================================================
@@ -443,14 +323,9 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-
-  .reveal-block,
-  .word-inner,
-  .audience-chart .chart-line,
-  .audience-chart .chart-area,
-  .audience-chart .chart-dots circle {
-    opacity: 1;
-    transform: none;
-    stroke-dashoffset: 0;
+  .kinetic-word,
+  .reveal-block {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
