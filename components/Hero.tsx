@@ -29,13 +29,25 @@ type PanelConfig = {
   index: string;
   kicker: string;
   kickerOpacity: string;
+  /** Optional full-bleed background image (path under /public). */
+  bgImage?: string;
+  /** Optional alt text describing the bg photograph. */
+  bgImageAlt?: string;
 };
 
 const panels: PanelConfig[] = [
   { kind: "brand", theme: "ink", index: "01", kicker: "GIFLIF Fest", kickerOpacity: "text-cream/50" },
   { kind: "curation", theme: "cream", index: "02", kicker: "Curation", kickerOpacity: "text-ink/50" },
   { kind: "audience", theme: "ink", index: "03", kicker: "Audience Intelligence", kickerOpacity: "text-accent" },
-  { kind: "production", theme: "red", index: "04", kicker: "Production", kickerOpacity: "text-cream/70" },
+  {
+    kind: "production",
+    theme: "red",
+    index: "04",
+    kicker: "Production",
+    kickerOpacity: "text-cream/70",
+    bgImage: "/images/atmosphere/audience-indiestaan.webp",
+    bgImageAlt: "Indiestaan Music Festival audience under stage lights",
+  },
   { kind: "cta", theme: "cream", index: "05", kicker: "Let's build", kickerOpacity: "text-ink/50" },
 ];
 
@@ -131,9 +143,33 @@ function PanelFrame({
         ${t.bg} ${t.fg}
       `}
     >
+      {/* Optional full-bleed background photograph */}
+      {config.bgImage && (
+        <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
+          <img
+            src={config.bgImage}
+            alt={config.bgImageAlt ?? ""}
+            className="w-full h-full object-cover scale-[1.02] panel-bg-photo"
+            loading="lazy"
+          />
+          {/* Theme-tinted overlay — keeps the panel's brand colour while letting the photo breathe through */}
+          <div
+            className={`absolute inset-0 mix-blend-multiply ${
+              config.theme === "red"
+                ? "bg-red/70"
+                : config.theme === "ink"
+                ? "bg-ink/70"
+                : "bg-cream/40"
+            }`}
+          />
+          {/* Vignette for type legibility */}
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/50 via-transparent to-ink/30" />
+        </div>
+      )}
+
       {/* Top-left: panel index */}
       <div
-        className={`absolute top-6 left-6 sm:top-10 sm:left-12 md:top-12 md:left-20
+        className={`absolute z-10 top-6 left-6 sm:top-10 sm:left-12 md:top-12 md:left-20
                     text-xs tracking-[0.25em] uppercase ${config.kickerOpacity}
                     font-mono`}
       >
@@ -142,13 +178,13 @@ function PanelFrame({
 
       {/* Top-right: kicker label */}
       <div
-        className={`absolute top-6 right-6 sm:top-10 sm:right-12 md:top-12 md:right-20
+        className={`absolute z-10 top-6 right-6 sm:top-10 sm:right-12 md:top-12 md:right-20
                     text-xs tracking-[0.25em] uppercase ${config.kickerOpacity}`}
       >
         {config.kicker}
       </div>
 
-      <div className="relative max-w-4xl w-full">{children}</div>
+      <div className="relative z-10 max-w-4xl w-full">{children}</div>
 
       {/* First panel scroll affordance */}
       {isFirst && (
@@ -231,47 +267,80 @@ function BrandPanel() {
 }
 
 // ---- Panel 02 — CURATION ----
+const CURATED_PORTRAITS = [
+  { slug: "ruskin-bond", name: "Ruskin Bond", role: "Author" },
+  { slug: "javed-akhtar", name: "Javed Akhtar", role: "Poet · Lyricist" },
+  { slug: "gulzar", name: "Gulzar", role: "Poet · Filmmaker" },
+  { slug: "lucky-ali", name: "Lucky Ali", role: "Musician" },
+  { slug: "piyush-mishra", name: "Piyush Mishra", role: "Actor · Lyricist" },
+  { slug: "rahat-indori", name: "Rahat Indori", role: "Poet" },
+  { slug: "saurabh-shukla", name: "Saurabh Shukla", role: "Actor · Director" },
+  { slug: "taapsee-pannu", name: "Taapsee Pannu", role: "Actor" },
+];
+
 function CurationPanel() {
   return (
-    <div className="flex flex-col items-start gap-6 sm:gap-8">
-      <Reveal>
-        <div
-          aria-hidden="true"
-          className="h-[3px] w-16 bg-red rounded-full animate-pulse-bar"
-        />
-      </Reveal>
+    <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-16 w-full">
+      {/* Left side: copy */}
+      <div className="flex flex-col items-start gap-6 sm:gap-8 lg:max-w-md flex-1 min-w-0">
+        <Reveal>
+          <div
+            aria-hidden="true"
+            className="h-[3px] w-16 bg-red rounded-full animate-pulse-bar"
+          />
+        </Reveal>
 
-      <h2 className="font-serif leading-[0.95] tracking-tight text-ink
-                     text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
-        <RevealWords text="We curate it." stagger={90} startDelay={100} />
-      </h2>
+        <h2 className="font-serif leading-[0.95] tracking-tight text-ink
+                       text-5xl sm:text-6xl md:text-7xl">
+          <RevealWords text="We curate it." stagger={90} startDelay={100} />
+        </h2>
 
-      <Reveal as="p" delay={400} className="font-serif text-2xl sm:text-3xl md:text-4xl leading-snug text-ink max-w-2xl">
-        Artists, speakers, ideas, concepts.
-      </Reveal>
+        <Reveal as="p" delay={400} className="font-serif text-2xl sm:text-3xl leading-snug text-ink max-w-md">
+          Artists, speakers, ideas, concepts.
+        </Reveal>
 
-      <Reveal as="p" delay={550} className="text-sm sm:text-base text-ink/60 max-w-xl leading-relaxed">
-        Eleven years of curatorial judgement — from poetry to punk to
-        political non-fiction.
-      </Reveal>
+        <Reveal as="p" delay={550} className="text-sm sm:text-base text-ink/60 leading-relaxed max-w-md">
+          Eleven years of curatorial judgement — from poetry to punk to
+          political non-fiction. A few of the people who've trusted us with
+          their stage:
+        </Reveal>
+      </div>
 
-      {/* Name-drop strip — reveal one at a time */}
-      <Reveal as="div" delay={800} className="flex flex-wrap gap-x-4 gap-y-2 pt-4 text-xs sm:text-sm tracking-[0.15em] uppercase text-ink/50 max-w-2xl">
-        {[
-          "Ruskin Bond",
-          "Javed Akhtar",
-          "Lucky Ali",
-          "Piyush Mishra",
-          "Raghubir Yadav",
-          "Rahat Indori",
-          "Saurabh Shukla",
-          "Indian Ocean",
-          "Kabir Cafe",
-        ].map((name, i) => (
-          <span key={name} className="flex items-center gap-4">
-            {name}
-            {i < 8 && <span className="text-ink/20">·</span>}
-          </span>
+      {/* Right side: portrait grid */}
+      <Reveal
+        as="div"
+        delay={700}
+        className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full lg:flex-1 lg:max-w-2xl"
+      >
+        {CURATED_PORTRAITS.map((p, i) => (
+          <figure
+            key={p.slug}
+            className="portrait-card group relative overflow-hidden rounded-md aspect-[3/4] bg-ink/5"
+            style={{
+              animationDelay: `${800 + i * 60}ms`,
+            }}
+          >
+            <img
+              src={`/images/curation/${p.slug}.webp`}
+              alt={`${p.name} — ${p.role}`}
+              loading={i < 4 ? "eager" : "lazy"}
+              className="absolute inset-0 w-full h-full object-cover
+                         transition-all duration-700 ease-out
+                         grayscale group-hover:grayscale-0
+                         scale-100 group-hover:scale-[1.04]"
+            />
+            {/* Bottom gradient + caption */}
+            <figcaption className="absolute inset-x-0 bottom-0 p-2 sm:p-3
+                                   bg-gradient-to-t from-ink/90 via-ink/40 to-transparent
+                                   text-cream">
+              <div className="text-[10px] sm:text-xs tracking-[0.15em] uppercase font-medium leading-tight">
+                {p.name}
+              </div>
+              <div className="text-[9px] sm:text-[10px] tracking-[0.1em] uppercase text-cream/70 mt-0.5">
+                {p.role}
+              </div>
+            </figcaption>
+          </figure>
         ))}
       </Reveal>
     </div>

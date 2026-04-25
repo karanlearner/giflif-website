@@ -106,6 +106,39 @@ body {
 }
 
 /* =======================================================================
+   Full-bleed background photographs — slow Ken Burns drift
+   Used on panels with bgImage (currently the Production panel).
+   Subtle pan + zoom keeps a still photo feeling alive.
+   ======================================================================= */
+
+.panel-bg-photo {
+  animation: kenburns 30s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes kenburns {
+  0% {
+    transform: scale(1.05) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.12) translate(-1.5%, 1%);
+  }
+}
+
+/* =======================================================================
+   Portrait cards (Curation panel)
+   Black-and-white default; restore colour on hover. Subtle scale on hover.
+   ======================================================================= */
+
+.portrait-card {
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.15);
+}
+
+.portrait-card:hover {
+  box-shadow: 0 12px 40px -10px rgba(179, 18, 26, 0.35);
+}
+
+/* =======================================================================
    Reveal animations — triggered by [data-seen="true"] attribute
    ======================================================================= */
 

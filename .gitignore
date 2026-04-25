@@ -46,6 +46,11 @@ next-env.d.ts
 # Web-ready optimised versions belong in `public/images/` and `public/video/`.
 # Originals are excluded from Git to keep the repo small and clones fast.
 # ============================================================================
+
+# Internal scratch / preview folders — never committed
+**/_thumbs/
+**/_scratch/
+
 /Speaker Images/
 /Speaker Images/**
 /Indiestaan Website images/
@@ -54,8 +59,24 @@ next-env.d.ts
 /Original Media/**
 /Source Footage/
 /Source Footage/**
+/Clips/
+/Clips/**
+
+# Camera RAW formats — never web-ready
 *.NEF
 *.RAW
 *.ARW
 *.CR2
+
+# Source video — too big for Git. Process into web-ready frames in
+# /public/sequence/ (small WebP series for scrolly hero) instead.
+*.MOV
+*.mov
+*.MP4
+*.mp4
+*.AVI
+*.avi
+*.MKV
+*.mkv
+
 
