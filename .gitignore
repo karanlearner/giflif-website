@@ -61,6 +61,17 @@ next-env.d.ts
 /Source Footage/**
 /Clips/
 /Clips/**
+/GIFLIF logo/
+/GIFLIF logo/**
+/Indiestaan Logo/
+/Indiestaan Logo/**
+
+# Photoshop / vector source files — keep masters local only
+*.psd
+*.PSD
+*.ai
+*.AI
+*.sketch
 
 # Camera RAW formats — never web-ready
 *.NEF

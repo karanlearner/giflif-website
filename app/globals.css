@@ -126,6 +126,159 @@ body {
 }
 
 /* =======================================================================
+   Curation TEXT-MASK — portraits live INSIDE the letterforms.
+   The headline "We curate it." is the viewport. The cream background fills
+   everything outside the letters. Inside the letters: a black-and-white
+   photograph that cycles every few seconds. Editorial, distinctive,
+   on-brand for a literary festival.
+   ======================================================================= */
+
+.text-portrait-mask {
+  /* The portrait image is set via the inline `--portrait-image` CSS variable */
+  background-image: var(--portrait-image);
+  background-size: cover;
+  background-position: 50% 30%; /* favour the eyes/face area */
+  background-repeat: no-repeat;
+  /* Clip the background to the letterforms */
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  /* Slight desaturation + contrast lift for editorial feel */
+  filter: grayscale(0.15) contrast(1.05);
+  /* Slow Ken Burns drift INSIDE the letters keeps the mask alive */
+  animation: text-mask-drift 14s ease-in-out infinite alternate;
+  will-change: background-position, transform;
+}
+
+@keyframes text-mask-drift {
+  0% {
+    background-position: 50% 28%;
+    background-size: 100% auto;
+  }
+  100% {
+    background-position: 52% 36%;
+    background-size: 108% auto;
+  }
+}
+
+/* When the React `key` updates (new portrait), the element remounts and
+   plays this entrance — softly blurred + scaled, snapping into focus. */
+.text-portrait-mask {
+  animation:
+    text-mask-drift 14s ease-in-out infinite alternate,
+    text-mask-enter 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes text-mask-enter {
+  from {
+    opacity: 0;
+    filter: grayscale(0.6) contrast(1) blur(10px);
+    transform: translateY(8px) scale(1.01);
+  }
+  to {
+    opacity: 1;
+    filter: grayscale(0.15) contrast(1.05) blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Curation panel hover — reveal a subtle red glow under the type */
+.curation-stage:hover .text-portrait-mask {
+  filter: grayscale(0) contrast(1.1);
+  transition: filter 600ms ease-out;
+}
+
+/* =======================================================================
+   IP showcase — split-screen reveal with logos
+   ======================================================================= */
+
+.ip-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ip-card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(0.35) brightness(0.45);
+  transform: scale(1.08);
+  transition:
+    filter 900ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 8s ease-out;
+}
+
+.ip-card:hover .ip-card-bg {
+  filter: grayscale(0) brightness(0.55);
+  transform: scale(1.12);
+}
+
+/* Curtain mask reveal — clip-path opens from center outward */
+.ip-card-curtain {
+  position: relative;
+  z-index: 1;
+  clip-path: inset(50% 0 50% 0);
+  transition: clip-path 1.4s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.ip-card[data-seen="true"] .ip-card-curtain {
+  clip-path: inset(0 0 0 0);
+}
+
+.ip-card-logo {
+  opacity: 0;
+  transform: translateY(16px) scale(0.96);
+  transition:
+    opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s,
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s,
+    filter 0.6s ease-out;
+}
+
+.ip-card[data-seen="true"] .ip-card-logo {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.ip-card:hover .ip-card-logo {
+  filter: drop-shadow(0 12px 30px rgba(255, 255, 255, 0.18));
+  transform: translateY(-4px) scale(1.02);
+}
+
+.ip-card-meta {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s,
+    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1.0s;
+}
+
+.ip-card[data-seen="true"] .ip-card-meta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animated edge accent — thin coloured line draws across when in view */
+.ip-card-edge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) 1.2s;
+  z-index: 2;
+}
+
+.ip-card[data-seen="true"] .ip-card-edge {
+  transform: scaleX(1);
+}
+
+/* =======================================================================
    Curation cinematic carousel — single-portrait crossfade gallery
    (replaces old portrait-grid that read too generic.)
    ======================================================================= */

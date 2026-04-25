@@ -1,27 +1,27 @@
 import Hero from "@/components/Hero";
+import IpShowcase from "@/components/IpShowcase";
 
 export default function Home() {
   return (
     <>
       <Hero />
 
-      {/* Below-the-hero teaser — shown when user continues past the panels.
-          Future sessions: replace with Featured Work, Our IPs, Audience
-          Intelligence block, Numbers Wall, Press, How We Work, CTA, Footer. */}
-      <section className="bg-ink text-cream py-24 px-6 sm:px-12 md:px-20 lg:px-28">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs tracking-[0.25em] uppercase text-cream/50 mb-6">
-            More sections coming soon
+      {/* Two cultural IPs — split-screen logo reveal */}
+      <IpShowcase />
+
+      {/* "More to come" — quieter teaser, the rest of the home builds out next */}
+      <section className="bg-ink text-cream py-20 px-6 sm:px-12 md:px-20 border-t border-cream/10">
+        <div className="max-w-4xl mx-auto flex flex-col gap-4">
+          <p className="text-xs tracking-[0.3em] uppercase text-cream/40">
+            Coming soon
           </p>
-          <h3 className="font-serif text-3xl sm:text-4xl md:text-5xl leading-tight tracking-tight text-cream max-w-2xl">
-            Selected work, our owned festival IPs, and the full story of how we
-            work — all landing here over the next few weeks.
-          </h3>
-          <p className="mt-8 text-sm text-cream/60 max-w-xl">
-            Want a conversation sooner? Write to{" "}
+          <p className="text-base sm:text-lg text-cream/60 max-w-xl leading-relaxed">
+            Selected client work · the full Audience Intelligence story · how
+            we work · journal · contact. Building out over the next few weeks.
+            For now, write to{" "}
             <a
               href="mailto:karan@giflif.in"
-              className="text-cream underline underline-offset-4 hover:text-red transition-colors"
+              className="text-cream hover:text-red transition-colors"
             >
               karan@giflif.in
             </a>

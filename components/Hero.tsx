@@ -281,9 +281,9 @@ const CURATED_PORTRAITS = [
 function CurationPanel() {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const ROTATION_MS = 3800;
+  const ROTATION_MS = 4200;
 
-  // Auto-rotate through portraits
+  // Auto-rotate the masked image inside the letterforms
   useEffect(() => {
     if (paused) return;
     const id = setInterval(() => {
@@ -292,110 +292,89 @@ function CurationPanel() {
     return () => clearInterval(id);
   }, [paused]);
 
+  const current = CURATED_PORTRAITS[index];
+  const portraitUrl = `url('/images/curation/${current.slug}.webp')`;
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 w-full items-stretch">
-      {/* LEFT — quiet copy block */}
-      <div className="lg:col-span-5 flex flex-col items-start gap-6 sm:gap-8 lg:justify-center">
+    <div
+      className="curation-stage relative w-full flex flex-col items-start justify-center gap-8 sm:gap-10 md:gap-12 py-6"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Pulse bar + meta */}
+      <div className="flex items-center gap-5">
         <Reveal>
           <div
             aria-hidden="true"
             className="h-[3px] w-16 bg-red rounded-full animate-pulse-bar"
           />
         </Reveal>
-
-        <h2 className="font-serif leading-[0.95] tracking-tight text-ink
-                       text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
-          <RevealWords text="We curate" stagger={90} startDelay={100} />
-          <br />
-          <span className="italic text-red">
-            <RevealWords text="it." stagger={90} startDelay={300} />
-          </span>
-        </h2>
-
-        <Reveal as="p" delay={500} className="font-serif text-xl sm:text-2xl leading-snug text-ink max-w-md">
-          Eleven years. The most distinguished voices in Indian culture — on
-          our stages.
+        <Reveal as="span" delay={200} className="text-[10px] tracking-[0.3em] uppercase text-ink/50 font-mono">
+          {String(index + 1).padStart(2, "0")} / {String(CURATED_PORTRAITS.length).padStart(2, "0")} ·
+          {" "}{current.year}
         </Reveal>
       </div>
 
-      {/* RIGHT — single cinematic carousel */}
-      <Reveal
-        as="div"
-        delay={700}
-        className="lg:col-span-7 relative w-full aspect-[4/5] lg:aspect-auto lg:h-[78vh] overflow-hidden rounded-sm bg-ink"
+      {/* Hero — text-mask. The portrait lives INSIDE the letterforms. */}
+      <h2
+        key={current.slug}
+        aria-label={`We curate it. Featured: ${current.name}, ${current.role}.`}
+        className="text-portrait-mask font-serif leading-[0.85] tracking-tighter
+                   text-[clamp(4rem,18vw,15rem)]
+                   md:text-[clamp(6rem,16vw,17rem)]"
+        style={
+          {
+            ["--portrait-image" as string]: portraitUrl,
+          } as React.CSSProperties
+        }
       >
-        <div
-          className="curated-carousel absolute inset-0"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
-          {CURATED_PORTRAITS.map((p, i) => (
-            <img
-              key={p.slug}
-              src={`/images/curation/${p.slug}.webp`}
-              alt={`${p.name} — ${p.role}`}
-              loading={i === 0 ? "eager" : "lazy"}
-              className={`absolute inset-0 w-full h-full object-cover grayscale
-                          ${i === index ? "opacity-100" : "opacity-0"}`}
-              style={{
-                transform: i === index ? "scale(1)" : "scale(1.04)",
-                transition:
-                  "opacity 1200ms ease-in-out, transform 5000ms ease-out",
-              }}
-            />
-          ))}
+        We curate <span className="italic">it.</span>
+      </h2>
 
-          {/* Top progress strip — 8 thin bars, the active one fills */}
-          <div className="absolute top-5 left-5 right-5 flex gap-1.5 z-10">
-            {CURATED_PORTRAITS.map((_, i) => (
-              <div
-                key={i}
-                className="h-[2px] flex-1 bg-cream/20 overflow-hidden"
-              >
-                <div
-                  className={`h-full bg-cream ${
-                    i === index
-                      ? "carousel-progress-active"
-                      : i < index
-                      ? "w-full"
-                      : "w-0"
-                  }`}
-                  style={
-                    i === index && !paused
-                      ? { animationDuration: `${ROTATION_MS}ms` }
-                      : undefined
-                  }
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom name plate */}
-          <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 md:p-12
-                          bg-gradient-to-t from-ink via-ink/80 to-transparent
-                          text-cream z-10">
-            <div
-              key={CURATED_PORTRAITS[index].slug}
-              className="carousel-nameplate"
-            >
-              <div className="text-[10px] sm:text-xs tracking-[0.3em] uppercase text-cream/60 mb-2 sm:mb-3">
-                {CURATED_PORTRAITS[index].role}
-              </div>
-              <div className="font-serif text-3xl sm:text-5xl md:text-6xl leading-[0.95] tracking-tight">
-                {CURATED_PORTRAITS[index].name}
-              </div>
-              <div className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-cream/50 mt-3 sm:mt-4">
-                {CURATED_PORTRAITS[index].year}
-              </div>
-            </div>
-          </div>
-
-          {/* Subtle counter — top right */}
-          <div className="absolute top-5 right-5 text-[10px] tracking-[0.25em] uppercase text-cream/60 font-mono z-10">
-            {String(index + 1).padStart(2, "0")} / {String(CURATED_PORTRAITS.length).padStart(2, "0")}
-          </div>
+      {/* Name plate — switches with the portrait */}
+      <div
+        key={"plate-" + current.slug}
+        className="flex flex-col gap-1 carousel-nameplate"
+      >
+        <div className="font-serif italic text-3xl sm:text-4xl md:text-5xl text-red leading-none">
+          {current.name}
         </div>
-      </Reveal>
+        <div className="text-xs sm:text-sm tracking-[0.2em] uppercase text-ink/60 mt-2">
+          {current.role}
+        </div>
+      </div>
+
+      {/* Thin progress strip across all 8 voices, anchored bottom of panel block */}
+      <div className="absolute -bottom-2 left-0 right-0 flex gap-1.5 max-w-3xl">
+        {CURATED_PORTRAITS.map((_, i) => (
+          <div
+            key={i}
+            className="h-[2px] flex-1 bg-ink/15 overflow-hidden"
+          >
+            <div
+              className={`h-full bg-red ${
+                i === index
+                  ? "carousel-progress-active"
+                  : i < index
+                  ? "w-full"
+                  : "w-0"
+              }`}
+              style={
+                i === index && !paused
+                  ? { animationDuration: `${ROTATION_MS}ms` }
+                  : undefined
+              }
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Tiny pre-load layer — keeps next images warm so swap is instant */}
+      <div className="hidden">
+        {CURATED_PORTRAITS.map((p) => (
+          <img key={p.slug} src={`/images/curation/${p.slug}.webp`} alt="" />
+        ))}
+      </div>
     </div>
   );
 }
