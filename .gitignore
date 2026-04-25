@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ============================================================================
+# GIFLIF — original media archive
+# Raw, unprocessed photos and videos live here for editorial selection.
+# Web-ready optimised versions belong in `public/images/` and `public/video/`.
+# Originals are excluded from Git to keep the repo small and clones fast.
+# ============================================================================
+/Speaker Images/
+/Speaker Images/**
+/Indiestaan Website images/
+/Indiestaan Website images/**
+/Original Media/
+/Original Media/**
+/Source Footage/
+/Source Footage/**
+*.NEF
+*.RAW
+*.ARW
+*.CR2
+
